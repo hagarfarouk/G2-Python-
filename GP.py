@@ -1,5 +1,5 @@
-
-
+### simulation code for a Node That receives from UART port then check and analyz the frame to generates
+### the data in array and generates a CAN frame from it and then resending occure
 
 import serial
 
@@ -87,9 +87,10 @@ def send_can_frame(can_frame):
 	
 
 
-data = receive_and_analyze_frame()
-if (data!= None)	
+while (1):
+	data = receive_and_analyze_frame()
+	if (data!= None):	
+		can_frame = create_can_frame(data)
+		send_can_frame(can_frame)
 	
-	can_frame = create_can_frame(data)
-	send_can_frame(can_frame)
 	
