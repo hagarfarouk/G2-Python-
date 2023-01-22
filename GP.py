@@ -4,8 +4,7 @@
 import serial
 import tkinter as tk
 
-
-def receive_and_analyze_frame():
+def receive_uart_frame():
     # Open the serial port
     ser = serial.Serial("COM3", baudrate=9600, timeout=1)
 
@@ -15,6 +14,9 @@ def receive_and_analyze_frame():
     # Convert the data to an array
     data_array = list(data)
 
+    return data_array
+
+def analyze_uart_frame(data_array):
     # Analyze all parts of the frame
     start_byte = data_array[0]
     payload = data_array[1:-2]
@@ -27,26 +29,25 @@ def receive_and_analyze_frame():
         calculated_checksum += i
     if checksum == calculated_checksum:
         # Checksum is valid
-        pass
+        print("Checksum is valid")
     else:
         # Checksum is invalid
-        pass
+        print("Checksum is invalid")
 
     # Check the frame of the data
     if start_byte == 0x01 and end_byte == 0x04:
         # Frame is valid
+        print("Frame is valid")
         return payload
     else:
         # Frame is invalid
+        print("Frame is invalid")
         return None
-
 		
-		
-
-def create_can_frame(data):
+def create_can_frame(data_array):
     # Set the CAN ID, DLC, arbitration field and ACK field
     can_id = 0x123
-    can_dlc = len(data)
+    can_dlc = len(data_array)
     arbitration_field = 0x00
     ack_field = 0x00
 
@@ -58,7 +59,7 @@ def create_can_frame(data):
     can_frame[3] = arbitration_field
     can_frame[4] = ack_field
     for i in range(can_dlc):
-        can_frame[5 + i] = data[i]
+        can_frame[5 + i] = data_array[i]
         
     # Calculate the CAN CRC
     crc = 0xFFFF
@@ -73,7 +74,6 @@ def create_can_frame(data):
     can_frame[5+can_dlc+1] = (crc >> 8) & 0xFF
     return can_frame
 
-
 def send_can_frame(can_frame):
     # Open a serial connection
     ser = serial.Serial()
@@ -85,10 +85,7 @@ def send_can_frame(can_frame):
     ser.write(can_frame)
 
     # Close the serial connection
-    ser.close()	
-	
-
-
+    ser.close()
 
 # GUI code
 root = tk.Tk()
@@ -101,6 +98,8 @@ received_data_label.pack()
 # Received data textbox
 received_data_textbox = tk.Text(root, height=5, width=50)
 received_data_textbox.pack()
+
+
 
 # Analyze button
 def on_analyze_button_click():
