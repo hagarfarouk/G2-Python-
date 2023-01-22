@@ -2,6 +2,8 @@
 ### the data in array and generates a CAN frame from it and then resending occure
 
 import serial
+import tkinter as tk
+
 
 def receive_and_analyze_frame():
     # Open the serial port
@@ -87,10 +89,38 @@ def send_can_frame(can_frame):
 	
 
 
-while (1):
-	data = receive_and_analyze_frame()
-	if (data!= None):	
-		can_frame = create_can_frame(data)
-		send_can_frame(can_frame)
+
+# GUI code
+root = tk.Tk()
+root.title("UART-CAN Simulation")
+
+# Received data label
+received_data_label = tk.Label(root, text="Received Data: ")
+received_data_label.pack()
+
+# Received data textbox
+received_data_textbox = tk.Text(root, height=5, width=50)
+received_data_textbox.pack()
+
+# Analyze button
+def on_analyze_button_click():
+    data_array = receive_uart_frame()
+    received_data_textbox.insert("1.0", data_array)
+    payload = analyze_uart_frame(data_array)
+    if payload != None:
+        print("Payload: ", payload)
+
+# Create and send button
+def on_create_and_send_button_click():
+    data_string = data_entry.get()
+    data_array = list(map(int, data_string.split(',')))
+    can_frame = create_can_frame(data_array)
+    send_can_frame(can_frame)	
 	
-	
+analyze_button = tk.Button(root, text="Analyze", command=on_analyze_button_click)
+analyze_button.pack()
+
+create_and_send_button = tk.Button(root, text="Create and Send", command=on_create_and_send_button_click)
+create_and_send_button.pack()
+root.mainloop()
+
